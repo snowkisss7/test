@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>表格</title>
+    <link href="index.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="#" />
+    <script type="text/javascript" src="static/js/myws.js"></script>
+   
+    <style>
+        table {
+
+
+            margin: auto;
+
+
+        }
+
+        table tbody {
+
+            display: block;
+            height: 800px;
+            overflow-y: scroll;
+        }
+
+        input.text {
+            text-align: center;
+            padding: 5px 20px;
+            width: 100px;
+        }
+
+
+        input.text1 {
+            text-align: center;
+            padding: 5px 20px;
+            width: 40px;
+        }
+
+        input.lasttime {
+            text-align: center;
+            padding: 5px 20px;
+            width: 130px;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .dialog_outter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .dialog_wrapper {
+            width: 400px;
+            height: 600px;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 10px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .dialog_close_btn {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            cursor: pointer;
+        }
+
+        .dialog_title {
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .dialog_content {
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .dialog_btn_group {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn_confirm {
+            background-color: Blue;
+            color: #fff;
+            padding: 10px 20px;
+            border: 1px solid blue;
+            border-radius: 4px;
+            margin-right: 90px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .btn_cancel {
+            background-color: #fff;
+            padding: 10px 20px;
+            border: 1px solid #000;
+            border-radius: 4px;
+            margin-right: 50px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .form_item span {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .form_item input {
+            width: 200px;
+            height: 25px;
+            line-height: 25px;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .form_item {
+            margin-bottom: 10px;
+        }
+
+        .form_item:last-child {
+            margin-bottom: 0;
+        }
+
+        .overlap {
+            background: #000;
+            opacity: 0.6;
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 创建一个div块标签，在该块标签中添加三个输入信息（编号、姓名、性别）的框框、一个确认添加的按钮（添加）-->
+    <!--
+    <div text-align: center; margin: margin: auto;>
+        <input type="text" id="id" placeholder="请输入编号">
+        <input type="text" id="name" placeholder="请输入姓名">
+        <input type="text" id="gender" placeholder="请输入性别">
+        <input type="button" value="添加" id="btn_add">
+
+    </div>
+    -->
+    <br>
+    <div>
+        <!--
+        <button type="button" onclick="getshuju()" class="btn btn-primary btn-lg">获取数据</button>
+  
+ -->
+        <span style="padding: 15px 18px; position: absolute; left: 8%;">问题设备：</span>
+        <input type="text" id="noworktext" style="padding: 15px 10px;width:300px; position: absolute; left: 14%;">
+
+        <button type="button" style="padding: 15px 18px; position: absolute; left: 36%;" ;
+            onclick="handleClick()">导入账号</button>
+
+
+        <div class="overlap"></div>
+
+
+        <div class="dialog_outter"></div>
+
+        <p style="padding: 15px 18px; position: absolute; left: 80%;" id="gxtime"></p>
+    </div>
+
+
+
+
+    <!--
+    <button type="button" onclick="change(2,2,'vbhvhbvhvh')" class="btn btn-primary btn-lg">修改</button>
+     -->
+    <br>
+
+    <br>
+    <br>
+    <div style="display:flex;">
+
+        <table id='tab' cellspacing="0px" border="3" bordercolor="red" style="margin: auto;top: 5%;">
+            <!-- 表格标题 -->
+
+
+
+
+            <caption>信息显示表</caption>
+            <!-- 表格第一行：表格表头 -->
+            <tr>
+                <th width="50"> 编号 </th>
+                <th>号码</th>
+                <th>云手机编号</th>
+                <th>导入时间</th>
+                <th></th>
+            </tr>
+
+
+
+        </table>
+
+
+        <table id='tab1' cellspacing="0px" border="3" bordercolor="red">
+            <!-- 表格标题 -->
+
+
+
+
+            <caption>设备使用信息显示表</caption>
+            <!-- 表格第一行：表格表头 -->
+            <tr>
+                <th> 编号 </th>
+                <th>设备个数</th>
+                <th>最近校准时间</th>
+                <th>是否有问题</th>
+                <th></th>
+            </tr>
+
+
+
+        </table>
+
+
+    </div>
+
+
+
+</body>
+<script>
+
+
+    let dialog_outter = document.querySelector(".dialog_outter")
+    let overlap = document.querySelector(".overlap")
+    const dialog_html_str = '<div class="dialog_wrapper">' +
+        '<div class="dialog_close_btn" onclick="closeDialog()">X</div>' +
+        '<div class="dialog_title">导入号码</div>' +
+        '<div class="dialog_content">' +
+        '<div class="form_item">' +
+
+        '<textarea name="textarea" id="upshuju" style="width:300px;height:460px;margin-top: 1%;">' +
+
+
+
+        '</textarea>' +
+        '<div class="dialog_btn_group">' +
+        '<div class="btn_confirm" onclick="upshuju()">导入</div>' +
+        '<div class="btn_cancel" onclick="closeDialog()">取消</div>' +
+        '</div>' +
+        '</div>'
+    function handleClick() {
+        //overlap.style.display = "block";
+        let fg = document.createRange().createContextualFragment(dialog_html_str)
+        dialog_outter.appendChild(fg)
+    }
+
+    function closeDialog() {
+        overlap.style.display = "none";
+        let dialog = document.querySelector(".dialog_wrapper");
+        dialog.remove(1);
+    }
+
+
+    function upshuju() {
+        const xhr = new XMLHttpRequest();
+        xhr.open('post', url + '/daoru');
+        var packJson = document.getElementById("upshuju").value;
+        console.log(packJson)
+
+        var jsonstr = JSON.stringify(packJson);
+        xhr.send(jsonstr)
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    console.log("接收")
+                    var str = xhr.response;
+                    str = str.substring(str.indexOf("[") + 1, str.indexOf("]"))
+
+                    str = "[" + str + "]";
+                    console.log(str);//输出4567
+                    let myobj = JSON.parse(str);
+
+                    var shuliang = myobj.length - 1;
+                    console.log(shuliang)
+                    if (myobj.length > 50) {
+                        for (var i = 1; i <= 50; i++) {
+                            console.log("i3=" + i + "***" + myobj[shuliang - i + 1].id);
+                            change(i, 0, myobj[shuliang - i + 1].id);
+                            change(i, 1, myobj[shuliang - i + 1].phonenum)
+                            if (myobj[shuliang - i + 1].yunnum == "kong") {
+                                change(i, 2, "")
+                            } else {
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                            };
+                            change(i, 3, myobj[shuliang - i + 1].timein)
+                        }
+                    } else {
+                        for (var i = 1; i <= shuliang + 1; i++) {
+                            //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+
+
+                            console.log("i")
+                            删除后导入数据出现问题
+                            console.log("i2=" + i);
+                            change(i, 0, myobj[shuliang - i + 1].id);
+                            change(i, 1, myobj[shuliang - i + 1].phonenum)
+                            if (myobj[shuliang - i + 1].yunnum == "kong") {
+                                change(i, 2, "")
+                            } else {
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                            };
+                            change(i, 3, myobj[shuliang - i + 1].timein)
+                        }
+
+                        for (var i = shuliang + 2; i <= 50; i++) {
+                            console.log("del*i=" + i);
+                            change(i, 0, "");
+                            change(i, 1, "");
+                            change(i, 2, "");
+                            change(i, 3, "");
+                        }
+
+
+                    }
+                }
+            }
+
+        }
+
+        closeDialog();
+
+    }
+
+
+    function getshuju() {
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('post', url + '/shuju');
+
+        console.log("发送")
+
+        //xhr.responseType = 'json'
+        //list1":
+        var packJson = { "limit": '50', "page": '43' };
+        var jsonstr = JSON.stringify(packJson);
+        xhr.send(jsonstr)
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    console.log("接收")
+                    console.log(xhr.response)
+                    //console.log(data)
+                    var str = xhr.response;
+                    if (str.indexOf("权限") > -1) {
+                        window.alert(str);
+                        window.location.href = "../index.html";
+                    }
+                    addequipinformation(str)
+
+
+
+
+
+                    //var str = "1234A4567B789";
+                    var qian = "list1\":"
+                    //console.log(qian)
+                    str = str.substring(str.indexOf(qian) + 8, str.indexOf("]"))
+
+                    str = "[" + str + "]";
+                    //console.log(str);//输出4567
+                    let myobj = JSON.parse(str);
+
+                    var shuliang = myobj.length - 1;
+                    //console.log(shuliang)
+                    if (myobj.length > 50) {
+
+                        for (var i = 1; i <= 50; i++) {
+                            //document.getElementById('tab').rows[1].cells[1].getElementsByTagName("input")[0].value = "sdfdsfds";
+                            change(i, 0, myobj[shuliang - i + 1].id)
+                            change(i, 1, myobj[shuliang - i + 1].phonenum)
+                            if (myobj[shuliang - i + 1].yunnum == "kong") {
+                                change(i, 2, "")
+                            } else {
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                            };
+                            change(i, 3, myobj[shuliang - i + 1].timein)
+                        }
+                    } else {
+                        for (var i = 1; i <= shuliang + 1; i++) {
+                            console.log("i")
+                            change(i, 0, myobj[shuliang - i + 1].id)
+                            change(i, 1, myobj[shuliang - i + 1].phonenum)
+                            if (myobj[shuliang - i + 1].yunnum == "kong") {
+                                change(i, 2, "")
+                            } else {
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                            };
+                            change(i, 3, myobj[shuliang - i + 1].timein)
+                        }
+
+                        for (var i = shuliang + 2; i <= 50; i++) {
+                            change(i, 0, "")
+                            change(i, 1, "")
+                            change(i, 2, "")
+                            change(i, 3, "")
+
+
+
+                        }
+
+
+                    }
+                }
+            }
+
+        }
+
+    }
+    function $(id) {
+        return document.getElementById(id);
+    };
+
+    function gettable(a) {
+
+        for (var i = 1; i <= a; i++) {
+
+            addHero("", "", "", "")
+        }
+    }
+
+    function getequiptable(a) {
+        var j = $("tab1").rows.length;
+        console.log("j=" + j);
+        console.log("a=" + a);
+        a = a + 1;
+        if (j < a) {
+            console.log("j<a");
+            for (var i = 1; i <= a - j; i++) {
+
+                addequip("", "", "", "")
+            }
+
+
+        } else if (j == a) {
+            console.log("j=a");
+        } if (j > a) {
+            console.log("j>a" + i);
+            for (var i = 1; i <= j - a; i++) {
+                console.log("删除" + i);
+                $("tab1").deleteRow(1);
+
+            }
+        }
+    };
+    //id, phonetotalnum, lasttime, iswork
+
+    function addinformation(str) {
+        var qian = "list1\":"
+        console.log("list1");
+        console.log(qian);
+        console.log(str);
+        str = str.substring(str.indexOf(qian) + 8, str.indexOf("]"))
+
+        str = "[" + str + "]";
+        console.log(str);
+        let myobj = JSON.parse(str);
+        str = "[" + str + "]";
+        console.log(str)
+        var shuliang = myobj.length - 1;
+        if (myobj.length > 50) {
+
+
+            for (var i = 1; i <= 50; i++) {
+                //change(i, 0, myobj[shuliang - i + 1].id)
+                //change(i, 1, myobj[shuliang - i + 1].phonenum)
+                if (myobj[shuliang - i + 1].yunnum == "kong") {
+                    change(i, 2, "")
+                } else {
+                    change(i, 2, myobj[shuliang - i + 1].yunnum)
+                };
+                //change(i, 2, myobj[shuliang - i + 1].yunnum)
+                change(i, 3, myobj[shuliang - i + 1].timein)
+            }
+        } else {
+            for (var i = 1; i <= shuliang; i++) {
+
+                //change(i, 0, myobj[shuliang - i + 1].id)
+                //change(i, 1, myobj[shuliang - i + 1].phonenum)
+                if (myobj[shuliang - i + 1].yunnum == "kong") {
+                    change(i, 2, "")
+                } else {
+                    change(i, 2, myobj[shuliang - i + 1].yunnum)
+                };
+                //change(i, 2, myobj[shuliang - i + 1].yunnum)
+                change(i, 3, myobj[shuliang - i + 1].timein)
+            }
+        }
+
+
+    };
+
+
+    function addequipinformation(str) {
+        var qian = "list2\":"
+        console.log(qian);
+        console.log(str);
+
+
+        var noworktext = document.getElementById('noworktext');
+
+        if (str.indexOf("****") > -1) {
+            noworktext.value = str.substring(str.indexOf("****") + 4, str.lastIndexOf("****"))
+        };
+
+
+        str = str.substring(str.indexOf(qian) + 8, str.lastIndexOf("]"))
+
+        str = "[" + str + "]";
+        console.log(str);
+        let myobj = JSON.parse(str);
+
+        var shuliang = myobj.length;
+
+        getequiptable(shuliang)
+
+        console.log(shuliang)
+        //2022年4月8日16时8分24秒
+        for (var i = 1; i <= shuliang; i++) {
+            changeequip(i, 0, myobj[shuliang - i].id)
+            changeequip(i, 1, myobj[shuliang - i].total)
+
+            var obj = myobj[shuliang - i].lasttime
+            var index = obj.indexOf("2022年");
+            console.log(index)
+            obj = obj.substring(index + 5, obj.length);
+
+            changeequip(i, 2, obj)
+            changeequip(i, 3, myobj[shuliang - i].iswork)
+        }
+
+
+
+
+
+    };
+
+
+
+
+    function addequip(id, total, lasttime, iswork) {
+
+
+
+
+        var tableRow = $("tab1").insertRow(1);
+        var Cell_0 = tableRow.insertCell(0);
+
+
+        Cell_0.innerHTML = '<input  class="text1" value="' + id + '"  readonly="true"/>';
+        Cell_0.className = "s1";
+        var Cell_1 = tableRow.insertCell(1);
+        Cell_1.innerHTML = '<input class="text1" value="' + total + '"  readonly="true"/>';
+        Cell_1.className = "s2";
+        var Cell_2 = tableRow.insertCell(2);
+        Cell_2.innerHTML = '<input class="lasttime"  value="' + lasttime + '"  readonly="true"/>';
+        Cell_2.className = "s3";
+        var Cell_2 = tableRow.insertCell(3);
+        Cell_2.innerHTML = '<input  class="text1" value="' + iswork + '"  readonly="true"/>';
+        Cell_2.className = "s4";
+        /*
+               var Cell_3 = tableRow.insertCell(4);
+               Cell_3.innerHTML = '<button type="button" class="text"   onclick=' + 'Del(this.parentNode,this.parentNode.parentNode.rowIndex)>删除</button>';
+               Cell_3.className = "s5";
+              
+               var Cell_4 = tableRow.insertCell(5);
+               Cell_4.innerHTML = "<a href='#' onclick='edit(this.parentNode.parentNode)' class='edit'>修改</a>";
+               Cell_4.className = "s6";
+               */
+    }
+
+    function addHerolast(id, phonenum, yunnum, timein) {
+
+        var tableRow = $("tab").insertRow(50);
+        var Cell_0 = tableRow.insertCell(0);
+
+
+        Cell_0.innerHTML = '<input class="text1" value="' + id + '"  readonly="true"/>';
+        Cell_0.className = "s1";
+        var Cell_1 = tableRow.insertCell(1);
+        Cell_1.innerHTML = '<input class="text" value="' + phonenum + '"  readonly="true"/>';
+        Cell_1.className = "s2";
+        var Cell_2 = tableRow.insertCell(2);
+        Cell_2.innerHTML = '<input class="text" value="' + yunnum + '"  readonly="true"/>';
+        Cell_2.className = "s3";
+        var Cell_2 = tableRow.insertCell(3);
+        Cell_2.innerHTML = '<input  class="text" value="' + timein + '"  readonly="true"/>';
+        Cell_2.className = "s4";
+
+        var Cell_3 = tableRow.insertCell(4);
+        Cell_3.innerHTML = '<button type="button" class="text"   onclick=' + 'Del(this.parentNode,this.parentNode.parentNode.rowIndex)>删除</button>';
+        Cell_3.className = "s5";
+        /*
+        var Cell_4 = tableRow.insertCell(5);
+        Cell_4.innerHTML = "<a href='#' onclick='edit(this.parentNode.parentNode)' class='edit'>修改</a>";
+        Cell_4.className = "s6";
+        */
+    }
+
+
+    function addHero(id, phonenum, yunnum, timein) {
+
+        var tableRow = $("tab").insertRow(1);
+        var Cell_0 = tableRow.insertCell(0);
+
+
+        Cell_0.innerHTML = '<input class="text1" value="' + id + '"  readonly="true"/>';
+        Cell_0.className = "s1";
+        var Cell_1 = tableRow.insertCell(1);
+        Cell_1.innerHTML = '<input class="text" value="' + phonenum + '"  readonly="true"/>';
+        Cell_1.className = "s2";
+        var Cell_2 = tableRow.insertCell(2);
+        Cell_2.innerHTML = '<input class="text" value="' + yunnum + '"  readonly="true"/>';
+        Cell_2.className = "s3";
+        var Cell_2 = tableRow.insertCell(3);
+        Cell_2.innerHTML = '<input  class="text" value="' + timein + '"  readonly="true"/>';
+        Cell_2.className = "s4";
+
+        var Cell_3 = tableRow.insertCell(4);
+        Cell_3.innerHTML = '<button type="button" class="text"   onclick=' + 'Del(this.parentNode,this.parentNode.parentNode.rowIndex)>删除</button><button type="button" class="text"   onclick=' + 'edit(this.parentNode.parentNode.rowIndex)>修改</button>';
+        Cell_3.className = "s5";
+
+        /*
+        var Cell_4 = tableRow.insertCell(5);
+        Cell_4.innerHTML = "<a href='#' onclick='edit(this.parentNode.parentNode)' class='edit'>修改</a>";
+        Cell_4.className = "s6";
+        */
+    }
+
+    function myEval(str) {
+        //var str = '{ "name": "Violet", "occupation": "character" }'; 
+        var obj = JSON.parse(str);
+        alert(obj.name);
+    }
+
+
+
+
+    // 初始化ws
+    function WebSocketTest() {
+        myws_start(ws_url);
+    }
+
+    function WebSocketSend() {
+        console.log("into WebSocketSend");
+        myws_send("abc");
+    }
+
+    // 监听建立连接
+    function myws_onopen() {
+        // Web Socket 已连接上，可使用 myws_send() 方法发送数据
+        console.log("数据发送中...");
+        myws_send("发送数据");
+        //getshuju();
+    };
+
+    // 监听收到消息
+    function myws_onmessage(evt) {
+        var received_msg = evt.data;
+        console.log("数据已接收...", received_msg);
+        str = received_msg;
+
+
+
+
+
+
+        if (str.indexOf("list2") > -1) {
+            var myDate = new Date();
+            $("gxtime").innerHTML = "表格更新时间：" + myDate.toLocaleTimeString()
+            addequipinformation(str);
+        };
+        if (str.indexOf("list1") > -1) {
+            addinformation(str);
+        };
+
+
+
+    };
+
+    // 监听关闭 websocket
+    function myws_onerror() {
+    };
+
+    // 监听关闭 websocket
+    function myws_onclose() {
+    }
+
+
+    function change(a, b, c) {
+        //document.getElementById('tab').rows[a].childNodes[b].innerText = c;
+        //document.getElementById('tab').rows[1].cells[2].getElementsByTagName("input")[0].value = "45465";
+        document.getElementById('tab').rows[a].cells[b].getElementsByTagName("input")[0].value = c;
+        //document.getElementById('tab').rows[a].cells[b].style.bgcolor="red"
+    }
+
+    function changeequip(a, b, c) {
+        //document.getElementById('tab').rows[a].childNodes[b].innerText = c;
+        //document.getElementById('tab').rows[1].cells[2].getElementsByTagName("input")[0].value = "45465";
+        document.getElementById('tab1').rows[a].cells[b].getElementsByTagName("input")[0].value = c
+    }
+    function updelshuju(a) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('post', url + '/del');
+        var str = 'false';
+        var jsonstr = JSON.stringify(a);
+        xhr.send(jsonstr)
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    console.log("接收")
+
+                    str = xhr.response;
+                    //var str = "1234A4567B789";
+                    console.log("xhr.response=" + str);
+                    //console.log(str);//输出4567
+                    return str;
+
+
+
+                }
+            }
+
+        }
+
+        return str;
+    };
+
+    // 修改方法
+    function edit(val) {
+        var a = window.confirm("您确定要修改吗？");
+
+        if (a) {
+            //$("tab").deleteRow(val);
+            console.log("val="+val);
+            
+            //updelshuju($("tab").rows[val].cells[0].getElementsByTagName("input")[0].value);
+            var str = $("tab").rows[val].cells[0].getElementsByTagName("input")[0].value;
+            const xhr = new XMLHttpRequest();
+            var b = "true";
+            xhr.open('post', url + '/edit');
+            var jsonstr = JSON.stringify(str);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+
+                        b = xhr.response;
+                        //var str = "1234A4567B789";
+                        console.log("del.response=" + b);
+                        if (b.indexOf("true") > -1) {
+                            change(val, 2, "");
+                            change(val, 3, "");
+
+                        } else {
+                            window.alert("删除失败！");
+                        };
+                    }
+                }
+
+            }
+
+
+        } else {
+            window.alert("未修改！");
+        }
+    }
+
+
+    // 删除方法
+
+    function Del(obj, val) {
+        var a = window.confirm("您确定要删除吗？");
+
+        if (a) {
+            //$("tab").deleteRow(val);
+            //updelshuju($("tab").rows[val].cells[0].getElementsByTagName("input")[0].value);
+            var str = $("tab").rows[val].cells[0].getElementsByTagName("input")[0].value;
+            const xhr = new XMLHttpRequest();
+            var b = "true";
+            xhr.open('post', url + '/del');
+            var jsonstr = JSON.stringify(str);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+
+                        b = xhr.response;
+                        //var str = "1234A4567B789";
+                        console.log("del.response=" + b);
+                        if (b.indexOf("true") > -1) {
+                            console.log("list2" + b.indexOf("list2"));
+                            if (b.indexOf("list2") > -1) {
+                                console.log("删除数据有云手机编号");
+                                addequipinformation(b);
+                            } else {
+
+                                console.log("删除数据没有云手机编号");
+                            };
+                            $("tab").deleteRow(val);
+                            console.log("删除成功！");
+                            addHero("", "", "", "")
+                        } else {
+                            window.alert("删除失败！");
+                        };
+                    }
+                }
+
+            }
+
+
+        } else {
+            window.alert("未删除！");
+        }
+    };
+
+    window.onload = function () {
+        getequiptable(50)
+        gettable(50);
+        getshuju()
+        WebSocketTest();
+        var myDate = new Date();
+        $("gxtime").innerHTML = "表格更新时间：" + myDate.toLocaleTimeString();
+
+        //getequiptable();
+
+    };
+
+
+
+</script>
+
+
+</html>

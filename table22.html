@@ -1,0 +1,629 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>动态表格</title>
+    <link href="index.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="#" />
+    <style>
+        table {
+
+
+            margin: auto;
+
+
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        .dialog_outter {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .dialog_wrapper {
+            width: 400px;
+            height: 600px;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            padding: 10px;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .dialog_close_btn {
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            cursor: pointer;
+        }
+
+        .dialog_title {
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .dialog_content {
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .dialog_btn_group {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn_confirm {
+            background-color: Blue;
+            color: #fff;
+            padding: 10px 20px;
+            border: 1px solid blue;
+            border-radius: 4px;
+            margin-right: 90px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .btn_cancel {
+            background-color: #fff;
+            padding: 10px 20px;
+            border: 1px solid #000;
+            border-radius: 4px;
+            margin-right: 50px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .form_item span {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .form_item input {
+            width: 200px;
+            height: 25px;
+            line-height: 25px;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .form_item {
+            margin-bottom: 10px;
+        }
+
+        .form_item:last-child {
+            margin-bottom: 0;
+        }
+
+        .overlap {
+            background: #000;
+            opacity: 0.6;
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 创建一个div块标签，在该块标签中添加三个输入信息（编号、姓名、性别）的框框、一个确认添加的按钮（添加）-->
+    <div text-align: center; margin: margin: auto;>
+        <input type="text" id="id" placeholder="请输入编号">
+        <input type="text" id="name" placeholder="请输入姓名">
+        <input type="text" id="gender" placeholder="请输入性别">
+        <input type="button" value="添加" id="btn_add">
+
+    </div>
+    <div>
+        <button type="button" onclick="getshuju()" class="btn btn-primary btn-lg">获取数据</button>
+        <script type="text/javascript" src="./myws.js"></script>
+
+
+        <div class="overlap"></div>
+        <button type="button" onclick="handleClick()" class="btn btn-primary btn-lg">弹 框 输 入</button>
+
+        <div class="dialog_outter"></div>
+
+
+    </div>
+
+
+    <script>
+        
+        var url="http://124.221.248.221"
+        var ws_url = "ws://"+"124.221.248.221:9002";
+        let dialog_outter = document.querySelector(".dialog_outter")
+        let overlap = document.querySelector(".overlap")
+        const dialog_html_str = '<div class="dialog_wrapper">' +
+            '<div class="dialog_close_btn" onclick="closeDialog()">X</div>' +
+            '<div class="dialog_title">导入号码</div>' +
+            '<div class="dialog_content">' +
+            '<div class="form_item">' +
+
+            '<textarea name="textarea" id="upshuju" style="width:300px;height:460px;margin-top: 1%;">' +
+
+
+
+            '</textarea>' +
+            '<div class="dialog_btn_group">' +
+            '<div class="btn_confirm" onclick="upshuju()">导入</div>' +
+            '<div class="btn_cancel" onclick="closeDialog()">取消</div>' +
+            '</div>' +
+            '</div>'
+        function handleClick() {
+            //overlap.style.display = "block";
+            let fg = document.createRange().createContextualFragment(dialog_html_str)
+            dialog_outter.appendChild(fg)
+        }
+
+        function closeDialog() {
+            overlap.style.display = "none";
+            let dialog = document.querySelector(".dialog_wrapper");
+            dialog.remove(1);
+        }
+
+
+        function upshuju() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('post', url+'/daoru');
+            //var packJson = { "limit": '50', "page": '43' };
+
+            //document.all.tab.removeNode(true);
+
+
+            var packJson = document.getElementById("upshuju").value;
+            console.log(packJson)
+
+            var jsonstr = JSON.stringify(packJson);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+                        //console.log(xhr.response);
+                        //var str = xhr.response.list
+                        //var obj = JSON.parse(str);
+                        //console.log(xhr.response.list)
+                        //let data=JSON.parse(xhr.response )
+
+                        //console.log(data)
+                        var str = xhr.response;
+                        //var str = "1234A4567B789";
+                        str = str.substring(str.indexOf("[") + 1, str.indexOf("]"))
+
+                        str = "[" + str + "]";
+                        console.log(str);//输出4567
+                        let myobj = JSON.parse(str);
+
+                        var shuliang = myobj.length - 1;
+                        console.log(shuliang)
+                        if (myobj.length > 50) {
+
+                            //change(1,1,"111")
+                            //change(1,1,myobj[2].phonenum)
+                            //change(1,2,myobj[2].yunnum)
+                            //change(1,3, myobj[2].timein)
+
+                            for (var i = 1; i <= 50; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+
+                                //change(i,1,"111")
+                                //document.getElementById('tab').rows[1].cells[1].getElementsByTagName("input")[0].value = "sdfdsfds";
+                                change(i, 0, myobj[shuliang - i + 1].id)
+                                change(i, 1, myobj[shuliang - i + 1].phonenum)
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                                change(i, 3, myobj[shuliang - i + 1].timein)
+                            }
+                        } else {
+                            for (var i = 1; i <= shuliang + 1; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+                                console.log("i")
+                                change(i, 0, myobj[shuliang - i + 1].id)
+                                change(i, 1, myobj[shuliang - i + 1].phonenum)
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                                change(i, 3, myobj[shuliang - i + 1].timein)
+
+
+                            }
+
+                            for (var i = shuliang + 2; i <= 50; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+
+
+                                change(i, 0, "")
+                                change(i, 1, "")
+                                change(i, 2, "")
+                                change(i, 3, "")
+
+
+
+                            }
+
+
+                        }
+                    }
+                }
+
+            }
+
+            closeDialog();
+
+        }
+
+
+
+
+
+
+        function getshuju() {
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('post', url+'/shuju');
+
+            console.log("发送"+ url+'/shuju')
+
+            //xhr.responseType = 'json'
+
+            var packJson = { "limit": '50', "page": '43' };
+            var jsonstr = JSON.stringify(packJson);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+                        //console.log(xhr.response);
+                        //var str = xhr.response.list
+                        //var obj = JSON.parse(str);
+                        //console.log(xhr.response.list)
+                        //let data=JSON.parse(xhr.response )
+                        console.log(xhr.response)
+                        //console.log(data)
+                        var str = xhr.response;
+                        //var str = "1234A4567B789";
+                        str = str.substring(str.indexOf("[") + 1, str.indexOf("]"))
+
+                        str = "[" + str + "]";
+                        console.log(str);//输出4567
+                        let myobj = JSON.parse(str);
+
+                        var shuliang = myobj.length - 1;
+                        console.log(shuliang)
+                        if (myobj.length > 50) {
+
+                            //change(1,1,"111")
+                            //change(1,1,myobj[2].phonenum)
+                            //change(1,2,myobj[2].yunnum)
+                            //change(1,3, myobj[2].timein)
+
+                            for (var i = 1; i <= 50; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+
+                                //change(i,1,"111")
+                                //document.getElementById('tab').rows[1].cells[1].getElementsByTagName("input")[0].value = "sdfdsfds";
+                                change(i, 0, myobj[shuliang - i + 1].id)
+                                change(i, 1, myobj[shuliang - i + 1].phonenum)
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                                change(i, 3, myobj[shuliang - i + 1].timein)
+                            }
+                        } else {
+                            for (var i = 1; i <= shuliang + 1; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+                                console.log("i")
+                                change(i, 0, myobj[shuliang - i + 1].id)
+                                change(i, 1, myobj[shuliang - i + 1].phonenum)
+                                change(i, 2, myobj[shuliang - i + 1].yunnum)
+                                change(i, 3, myobj[shuliang - i + 1].timein)
+
+
+                            }
+
+                            for (var i = shuliang + 2; i <= 50; i++) {
+                                //addHero(myobj[i].id, myobj[i].phonenum, myobj[i].yunnum, myobj[i].timein)
+
+
+                                change(i, 0, "")
+                                change(i, 1, "")
+                                change(i, 2, "")
+                                change(i, 3, "")
+
+
+
+                            }
+
+
+                        }
+                        /*
+                        if (myobj.length > 50) {
+                            for (var i = 3; i <= 50; i++) {
+
+                                //document.getElementById('tab').rows[shuliang - i].childNodes[0].innerText = myobj[i].id;
+                                //document.getElementById('tab').rows[shuliang - i].childNodes[1].innerText = myobj[i].phonenum;
+                                //document.getElementById('tab').rows[shuliang - i].childNodes[2].innerText = myobj[i].yunnum;
+                                addHero(myobj[shuliang - 50 + i].id, myobj[shuliang - 50 + i].phonenum, myobj[shuliang - 50 + i].yunnum, myobj[shuliang - 50 + i].timein)
+                            }
+                        } else {
+                            for (var i = 3; i <= 50; i++) {
+
+                                addHero(myobj[shuliang - 50 + i].id, myobj[shuliang - 50 + i].phonenum, myobj[shuliang - 50 + i].yunnum, myobj[shuliang - 50 + i].timein)
+                            }
+                        }
+*/
+
+
+
+
+
+
+
+                        //alert(obj[1].id)
+                        //console.log(xhr.response)
+                        //alert(xhr.response.list[0].name);
+                        //console.log(xhr.response.Array(0));
+                    }
+                }
+
+            }
+
+        }
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function gettable() {
+            for (var i = 1; i <= 50; i++) {
+
+                addHero("", "", "", "")
+            }
+        }
+
+
+        function addHero(id, phonenum, yunnum, timein) {
+
+            var tableRow = $("tab").insertRow(1);
+            var Cell_0 = tableRow.insertCell(0);
+
+
+            Cell_0.innerHTML = '<input value="' + id + '"  readonly="true"/>';
+            Cell_0.className = "s1";
+            var Cell_1 = tableRow.insertCell(1);
+            Cell_1.innerHTML = '<input value="' + phonenum + '"  readonly="true"/>';
+            Cell_1.className = "s2";
+            var Cell_2 = tableRow.insertCell(2);
+            Cell_2.innerHTML = '<input value="' + yunnum + '"  readonly="true"/>';
+            Cell_2.className = "s3";
+            var Cell_2 = tableRow.insertCell(2);
+            Cell_2.innerHTML = '<input value="' + timein + '"  readonly="true"/>';
+            Cell_2.className = "s4";
+
+            var Cell_3 = tableRow.insertCell(4);
+            Cell_3.innerHTML = "<a href='#' onclick='Del(this.parentNode,this.parentNode.parentNode.rowIndex)'>删除</a>";
+            Cell_3.className = "s5";
+            var Cell_4 = tableRow.insertCell(5);
+            Cell_4.innerHTML = "<a href='#' onclick='edit(this.parentNode.parentNode)' class='edit'>修改</a>";
+            Cell_4.className = "s6";
+        }
+
+        function myEval(str) {
+            //var str = '{ "name": "Violet", "occupation": "character" }'; 
+            var obj = JSON.parse(str);
+            alert(obj.name);
+        }
+
+        function edit(obj) {
+            var inp = obj.getElementsByTagName("input");
+            for (var i = 0, len = inp.length; i < len; i++) {
+                inp[i].readOnly = false;
+            }
+        }
+
+        window.onload = function () {
+            //getshuju()
+            WebSocketTest();
+            gettable();
+
+
+        }
+
+        
+
+        // 初始化ws
+        function WebSocketTest() {
+            myws_start(ws_url);
+        }
+
+        function WebSocketSend() {
+            console.log("into WebSocketSend");
+            myws_send("abc");
+        }
+
+        // 监听建立连接
+        function myws_onopen() {
+            // Web Socket 已连接上，可使用 myws_send() 方法发送数据
+            console.log("数据发送中...");
+            myws_send("发送数据");
+            getshuju();
+        };
+
+        // 监听收到消息
+        function myws_onmessage(evt) {
+            var received_msg = evt.data;
+            console.log("数据已接收...", received_msg);
+            str = received_msg;
+            str = str.substring(str.indexOf("[") + 1, str.indexOf("]"))
+
+            str = "[" + str + "]";
+            console.log(str)
+            let myobj = JSON.parse(str);
+
+            var shuliang = myobj.length - 1;
+            if (myobj.length > 50) {
+
+
+                for (var i = 1; i <= 50; i++) {
+                    //change(i, 0, myobj[shuliang - i + 1].id)
+                    //change(i, 1, myobj[shuliang - i + 1].phonenum)
+                    change(i, 2, myobj[shuliang - i + 1].yunnum)
+                    change(i, 3, myobj[shuliang - i + 1].timein)
+                }
+            } else {
+                for (var i = 1; i <= shuliang; i++) {
+
+                    //change(i, 0, myobj[shuliang - i + 1].id)
+                    //change(i, 1, myobj[shuliang - i + 1].phonenum)
+                    change(i, 2, myobj[shuliang - i + 1].yunnum)
+                    change(i, 3, myobj[shuliang - i + 1].timein)
+                }
+            }
+
+
+
+
+        };
+
+        // 监听关闭 websocket
+        function myws_onerror() {
+        };
+
+        // 监听关闭 websocket
+        function myws_onclose() {
+        }
+
+    </script>
+    </div>
+    <button type="button" onclick="change(2,2,'vbhvhbvhvh')" class="btn btn-primary btn-lg">修改</button>
+    <table id='tab' cellspacing="0px" border="3" bordercolor="red">
+        <!-- 表格标题 -->
+
+
+
+
+        <caption>学生信息表</caption>
+        <!-- 表格第一行：表格表头 -->
+        <tr>
+            <th> 编号 </th>
+            <th>号码</th>
+            <th>云手机编号</th>
+            <th>导入时间</th>
+            <th></th>
+        </tr>
+
+        <!-- 表格第二行：学生信息2 -->
+
+        <!-- 
+
+        <tr>
+            <td>1</td>
+            <td>18910191019</td>
+            <td>14</td>
+            <td>2月28日21:7:30</td>
+
+            <td><a href="javascript:void(0);" onclick="deleteTr(this);">删除</a></td>
+        </tr>
+-->
+        <!-- 在该单元格中创建一个链接标签，void运算符来阻止href返回值，通过onclick事件(鼠标点击)属性来删除信息行-->
+    </table>
+
+
+
+</body>
+<script>
+    // 1.获取按钮
+    //myobj[i].id, myobj[i].phonenum, myobj[i].yunnum,myobj[i].timein)
+
+    function change(a, b, c) {
+        //document.getElementById('tab').rows[a].childNodes[b].innerText = c;
+        //document.getElementById('tab').rows[1].cells[2].getElementsByTagName("input")[0].value = "45465";
+        document.getElementById('tab').rows[a].cells[b].getElementsByTagName("input")[0].value = c
+    }
+
+    function updelshuju(a) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('post',url+'/del');
+            var str='false';
+            var jsonstr = JSON.stringify(a);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+
+                        str = xhr.response;
+                        //var str = "1234A4567B789";
+                        console.log("xhr.response="+str);
+                        //console.log(str);//输出4567
+                        return str;
+ 
+
+
+                    }
+                }
+
+            }
+
+            return str;
+        };
+
+        function sum(a , b , c){
+				//alert(a + b +c);
+				var d = a + b + c;
+				return d;
+				//return undefined;
+			}
+
+    // 删除方法
+
+    function Del(obj, val) {
+        var a = window.confirm("您确定要删除吗？");
+
+        if (a) {
+            //$("tab").deleteRow(val);
+            //updelshuju($("tab").rows[val].cells[0].getElementsByTagName("input")[0].value);
+            var str=$("tab").rows[val].cells[0].getElementsByTagName("input")[0].value;
+            const xhr = new XMLHttpRequest();
+            var b="true";
+            xhr.open('post', url+'/del');
+            var jsonstr = JSON.stringify(str);
+            xhr.send(jsonstr)
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        console.log("接收")
+
+                        b = xhr.response;
+                        //var str = "1234A4567B789";
+                        console.log("xhr.response="+b);
+                    }
+                }
+
+            }
+            
+            if (b=="true") {
+                $("tab").deleteRow(val);
+                console.log("删除成功！");
+            } else {
+                window.alert("删除失败！");
+            }
+
+
+        } else {
+            window.alert("未删除！");
+        }
+    }
+
+
+
+
+</script>
+
+</html>
